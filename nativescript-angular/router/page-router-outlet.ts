@@ -149,6 +149,7 @@ export class PageRouterOutlet implements OnDestroy { // tslint:disable-line:dire
         private parentContexts: ChildrenOutletContexts,
         private location: ViewContainerRef,
         @Attribute("name") name: string,
+        @Attribute("showActionBar") showActionBar: string,
         private locationStrategy: NSLocationStrategy,
         private componentFactoryResolver: ComponentFactoryResolver,
         private resolver: ComponentFactoryResolver,
@@ -164,11 +165,43 @@ export class PageRouterOutlet implements OnDestroy { // tslint:disable-line:dire
             log(`PageRouterOutlet.constructor frame: ${this.frame}`);
         }
 
+        this.setActionBarVisibility(showActionBar);
+
         this.name = name || PRIMARY_OUTLET;
         parentContexts.onChildOutletCreated(this.name, <any>this);
 
         this.viewUtil = new ViewUtil(device);
         this.detachedLoaderFactory = resolver.resolveComponentFactory(DetachedLoader);
+    }
+
+    setActionBarVisibility(showActionBar: string) {
+        switch (showActionBar) {
+            case "false":
+            case "never":
+                if (this.frame.ios) {
+                    this.frame.ios.navBarVisibility = "never";
+                } else if (this.frame.android) {
+                    this.frame.android.showActionBar = false;
+                }
+                break;
+
+            case "always":
+            case "true":
+                if (this.frame.ios) {
+                    this.frame.ios.navBarVisibility = "always";
+                } else if (this.frame.android) {
+                    this.frame.android.showActionBar = true;
+                }
+                break;
+
+            default:
+                if (this.frame.ios) {
+                    this.frame.ios.navBarVisibility = "auto";
+                } else if (this.frame.android) {
+                    this.frame.android.showActionBar = undefined;
+                }
+                break;
+        }
     }
 
     ngOnDestroy(): void {
